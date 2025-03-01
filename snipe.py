@@ -84,11 +84,21 @@ def process_message(message):
 async def on_message(message):
     if message.author.bot:
         return
+
     if message.channel.name == SNIPED_CHANNEL_NAME:
+        # Store previous count
+        prev_count = image_count[message.author.id]
+
+        # Process the message
         process_message(message)
-        save_data()
-        await message.channel.send(f"{message.author.mention} uploaded an image! Leaderboard updated.")
+
+        # Only send a message if an image count increased
+        if image_count[message.author.id] > prev_count:
+            save_data()
+            await message.channel.send(f"{message.author.mention} uploaded an image! Leaderboard updated.")
+    
     await bot.process_commands(message)
+
 
 @bot.event
 async def on_message_edit(before, after):
@@ -99,23 +109,23 @@ async def on_message_edit(before, after):
 
 @bot.command()
 async def leaderboard(ctx):
-    """Shows the leaderboard for image posts and tags"""
+    """Shows the leaderboard for kills (images) and deaths (tags)"""
     if not image_count:
-        await ctx.send("No one has uploaded any images yet!")
+        await ctx.send("No kills recorded yet!")
         return
 
-    image_sorted = sorted(image_count.items(), key=lambda x: x[1], reverse=True)
-    tagged_sorted = sorted(tagged_count.items(), key=lambda x: x[1], reverse=True)
+    kills_sorted = sorted(image_count.items(), key=lambda x: x[1], reverse=True)
+    deaths_sorted = sorted(tagged_count.items(), key=lambda x: x[1], reverse=True)
 
-    leaderboard_msg = "**📸 Image Leaderboard 📸**\n"
-    for idx, (user_id, count) in enumerate(image_sorted[:10], start=1):
+    leaderboard_msg = "**🔪 Kills Leaderboard 🔪**\n"
+    for idx, (user_id, count) in enumerate(kills_sorted[:10], start=1):
         user = bot.get_user(user_id) or f"Unknown User ({user_id})"
-        leaderboard_msg += f"{idx}. {user} - {count} images\n"
+        leaderboard_msg += f"{idx}. {user} - {count} kills\n"
 
-    leaderboard_msg += "\n**🏷️ Tagged Leaderboard 🏷️**\n"
-    for idx, (user_id, count) in enumerate(tagged_sorted[:10], start=1):
+    leaderboard_msg += "\n**💀 Deaths Leaderboard 💀**\n"
+    for idx, (user_id, count) in enumerate(deaths_sorted[:10], start=1):
         user = bot.get_user(user_id) or f"Unknown User ({user_id})"
-        leaderboard_msg += f"{idx}. {user} - {count} times tagged\n"
+        leaderboard_msg += f"{idx}. {user} - {count} deaths\n"
 
     await ctx.send(leaderboard_msg)
 
