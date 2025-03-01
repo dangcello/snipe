@@ -49,19 +49,22 @@ SNIPED_CHANNEL_NAME = "snipped"
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
 
+    # Reset counts before recalculating from history
+    global image_count, tagged_count
+    image_count.clear()
+    tagged_count.clear()
+
     for guild in bot.guilds:
         for channel in guild.text_channels:
             if channel.name == SNIPED_CHANNEL_NAME:
-                print(f"📂 Scanning past messages in #{channel.name}...")
+                print(f"📂 Rescanning past messages in #{channel.name}...")
 
                 async for message in channel.history(limit=10000):
                     process_message(message)
                 
-                # Save updated counts after processing all messages
-                save_data()
+                save_data()  # Save recalculated leaderboard
 
-                print("✅ Past messages processed and leaderboard updated!")
-
+                print("✅ Past messages reprocessed! Leaderboard corrected.")
 
 def process_message(message):
     """Helper function to process messages for leaderboard"""
@@ -73,8 +76,8 @@ def process_message(message):
             image_count[message.author.id] += 1
             print(f"✅ {message.author} uploaded an image. Total: {image_count[message.author.id]}")  # Debug log
 
-    # Check if the message tags users
-    if message.mentions:
+    # Check if the message tags users (excluding bot messages)
+    if message.mentions and not message.author.bot:
         for user in message.mentions:
             tagged_count[user.id] += 1
             print(f"✅ {user} was tagged. Total: {tagged_count[user.id]}")  # Debug log
@@ -128,6 +131,22 @@ async def leaderboard(ctx):
         leaderboard_msg += f"{idx}. {user} - {count} deaths\n"
 
     await ctx.send(leaderboard_msg)
+
+
+@bot.command()
+async def set_kills(ctx, member: discord.Member, value: int):
+    """Manually set the kill count for a user."""
+    image_count[member.id] = max(0, value)  # Ensure non-negative
+    save_data()
+    await ctx.send(f"🔪 {member.mention} now has {value} kills.")
+
+@bot.command()
+async def set_deaths(ctx, member: discord.Member, value: int):
+    """Manually set the death count for a user."""
+    tagged_count[member.id] = max(0, value)  # Ensure non-negative
+    save_data()
+    await ctx.send(f"💀 {member.mention} now has {value} deaths.")
+
 
 @bot.command()
 async def reset_leaderboard(ctx):
