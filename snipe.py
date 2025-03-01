@@ -159,6 +159,9 @@ async def reset_leaderboard(ctx):
     save_data()
     await ctx.send("Leaderboard has been reset!")
 
+import discord
+from discord.utils import get
+
 @bot.command()
 async def run_commands_from_file(ctx, file_path: str):
     """Executes multiple commands from a file"""
@@ -173,15 +176,40 @@ async def run_commands_from_file(ctx, file_path: str):
         command = command.strip()
         if command:  # If the line is not empty
             try:
-                # Use the context to invoke the command
-                await ctx.invoke(bot.get_command(command.split()[0][1:]), *command.split()[1:])
-                print(f"✅ Executed: {command}")
+                # Split the command and get the command name and arguments
+                parts = command.split()
+                cmd_name = parts[0][1:]  # Remove the leading '!' from command name
+                args = parts[1:]  # The rest are arguments
+
+                # Try to resolve user mentions to user objects
+                if len(args) > 1:  # Only resolve mentions if there are arguments
+                    resolved_args = []
+                    for arg in args:
+                        if arg.startswith("<@") and arg.endswith(">"):  # Handle mentions
+                            user_id = int(arg[2:-1])  # Extract the user ID from the mention
+                            user = bot.get_user(user_id)  # Get the discord.User object
+                            if user:
+                                resolved_args.append(user)
+                            else:
+                                resolved_args.append(arg)  # If user not found, keep the raw mention
+                        else:
+                            resolved_args.append(arg)  # If it's not a mention, keep the argument
+
+                    # Invoke the command with resolved arguments
+                    await ctx.invoke(bot.get_command(cmd_name), *resolved_args)
+                    print(f"✅ Executed: {command}")
+                else:
+                    # If no arguments, just invoke the command
+                    await ctx.invoke(bot.get_command(cmd_name))
+                    print(f"✅ Executed: {command}")
+
             except Exception as e:
                 print(f"❌ Failed to execute {command}: {e}")
                 await ctx.send(f"Failed to execute: {command}")
                 continue
 
     await ctx.send("All commands executed!")
+
 
 # Run the bot
 bot.run(TOKEN)
