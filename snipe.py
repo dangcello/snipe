@@ -95,7 +95,7 @@ async def on_message(message):
         # Only send a message if an image count increased
         if image_count[message.author.id] > prev_count:
             save_data()
-            await message.channel.send(f"{message.author.mention} uploaded an image! Leaderboard updated.")
+            await message.channel.send(f"{message.author.mention} Sniped Someone! Leaderboard updated.")
     
     await bot.process_commands(message)
 
