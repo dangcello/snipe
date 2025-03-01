@@ -77,7 +77,7 @@ def process_message(message):
             print(f"✅ {message.author} uploaded an image. Total: {image_count[message.author.id]}")  # Debug log
 
     # Check if the message tags users (excluding bot messages)
-    if message.mentions and not message.author.bot:
+    if message.mentions and not message.author.bot and not message.reference:
         for user in message.mentions:
             tagged_count[user.id] += 1
             print(f"✅ {user} was tagged. Total: {tagged_count[user.id]}")  # Debug log
