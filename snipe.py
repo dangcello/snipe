@@ -134,18 +134,20 @@ async def leaderboard(ctx):
 
 
 @bot.command()
-async def set_kills(ctx, member: discord.Member, value: int):
-    """Manually set the kill count for a user."""
-    image_count[member.id] = max(0, value)  # Ensure non-negative
+@commands.has_permissions(manage_messages=True)  # Only users with manage_messages permission can execute this
+async def set_kills(ctx, user: discord.User, kills: int):
+    """Manually set the kills (images uploaded) count for a user"""
+    image_count[user.id] = kills
     save_data()
-    await ctx.send(f"🔪 {member.mention} now has {value} kills.")
+    await ctx.send(f"✅ {user} now has {kills} kills (images uploaded)!")
 
 @bot.command()
-async def set_deaths(ctx, member: discord.Member, value: int):
-    """Manually set the death count for a user."""
-    tagged_count[member.id] = max(0, value)  # Ensure non-negative
+@commands.has_permissions(manage_messages=True)  # Only users with manage_messages permission can execute this
+async def set_deaths(ctx, user: discord.User, deaths: int):
+    """Manually set the deaths (tags) count for a user"""
+    tagged_count[user.id] = deaths
     save_data()
-    await ctx.send(f"💀 {member.mention} now has {value} deaths.")
+    await ctx.send(f"✅ {user} now has {deaths} deaths (tags)!")
 
 
 @bot.command()
