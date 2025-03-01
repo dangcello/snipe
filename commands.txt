@@ -1,0 +1,25 @@
+!set_deaths @dangcello 2
+!set_deaths @ackle 3
+!set_deaths @darrenzwc 1
+!set_deaths @helenaana0620 2
+!set_deaths @zach.houlton 4
+!set_deaths @mgunner4517 6
+!set_deaths @.tpony 4
+!set_deaths @jwoalabear 3
+!set_deaths @jameslee0727 5
+!set_deaths @rohinrajesh 2
+!set_deaths @vincent3_ 1
+!set_deaths @deerlegume 1
+!set_deaths @shivanianna 1
+!set_deaths @callofanthony 4
+!set_kills @jwal 9
+!set_kills @darrenzwc 3
+!set_kills @grace.p 2
+!set_kills @audrey_tan 1
+!set_kills @dangcello 6
+!set_kills @jwoalabear 9
+!set_kills @jameslee0727 5
+!set_kills @ackle 8
+!set_kills @callofanthony 3
+
+
