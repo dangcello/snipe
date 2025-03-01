@@ -11,20 +11,25 @@ if not TOKEN:
 
 DATA_FILE = "leaderboard.json"
 
-# Load data from file
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    return {"image_count": {}, "tagged_count": {}}
+            data = json.load(f)
+            print(f"📂 Loaded data: {data}")  # Debug log
+            return data
+    else:
+        print("⚠️ No leaderboard.json found, creating a new one.")
+        return {"image_count": {}, "tagged_count": {}}  # Empty leaderboard
 
-# Save data to file
+
 def save_data():
+    print(f"📁 Saving data... {dict(image_count)}")  # Debug log
     with open(DATA_FILE, "w") as f:
         json.dump({
             "image_count": dict(image_count),
             "tagged_count": dict(tagged_count)
         }, f)
+
 
 # Load existing data at startup
 data = load_data()
@@ -38,27 +43,42 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-SNIPED_CHANNEL_NAME = "sniped"
+SNIPED_CHANNEL_NAME = "snipped"
 
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
+
     for guild in bot.guilds:
         for channel in guild.text_channels:
             if channel.name == SNIPED_CHANNEL_NAME:
                 print(f"📂 Scanning past messages in #{channel.name}...")
-                async for message in channel.history(limit=1000):
+
+                async for message in channel.history(limit=10000):
                     process_message(message)
+                
+                # Save updated counts after processing all messages
                 save_data()
-                print("✅ Past messages processed!")
+
+                print("✅ Past messages processed and leaderboard updated!")
+
 
 def process_message(message):
     """Helper function to process messages for leaderboard"""
-    if message.attachments:
-        image_count[message.author.id] += 1
+    print(f"📥 Processing message from {message.author}...")  # Debug log
+
+    # Check if message contains image attachments
+    for attachment in message.attachments:
+        if any(attachment.filename.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']):
+            image_count[message.author.id] += 1
+            print(f"✅ {message.author} uploaded an image. Total: {image_count[message.author.id]}")  # Debug log
+
+    # Check if the message tags users
     if message.mentions:
         for user in message.mentions:
             tagged_count[user.id] += 1
+            print(f"✅ {user} was tagged. Total: {tagged_count[user.id]}")  # Debug log
+
 
 @bot.event
 async def on_message(message):
