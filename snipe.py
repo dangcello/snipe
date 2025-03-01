@@ -159,5 +159,29 @@ async def reset_leaderboard(ctx):
     save_data()
     await ctx.send("Leaderboard has been reset!")
 
+@bot.command()
+async def run_commands_from_file(ctx, file_path: str):
+    """Executes multiple commands from a file"""
+    if not os.path.exists(file_path):
+        await ctx.send("File not found!")
+        return
+
+    with open(file_path, "r") as file:
+        commands = file.readlines()
+
+    for command in commands:
+        command = command.strip()
+        if command:  # If the line is not empty
+            try:
+                # Use the context to invoke the command
+                await ctx.invoke(bot.get_command(command.split()[0][1:]), *command.split()[1:])
+                print(f"✅ Executed: {command}")
+            except Exception as e:
+                print(f"❌ Failed to execute {command}: {e}")
+                await ctx.send(f"Failed to execute: {command}")
+                continue
+
+    await ctx.send("All commands executed!")
+
 # Run the bot
 bot.run(TOKEN)
