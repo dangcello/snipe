@@ -111,7 +111,7 @@ async def on_message_edit(before, after):
         process_message(after)
         save_data()
 
-command()
+@bot.command()
 async def leaderboard(ctx):
     """Shows the full leaderboard for kills and deaths"""
     if not image_count and not tagged_count:
